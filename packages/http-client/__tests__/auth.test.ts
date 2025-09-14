@@ -30,6 +30,7 @@ describe('auth', () => {
   })
 
   it('does basic http get request with pat token auth', async () => {
+    // Using fake token for testing - never use real tokens in tests
     const token = 'scbfb44vxzku5l4xgc3qfazn3lpk4awflfryc76esaiq7aypcbhs'
     const ph: am.PersonalAccessTokenCredentialHandler = new am.PersonalAccessTokenCredentialHandler(
       token
@@ -54,6 +55,7 @@ describe('auth', () => {
   })
 
   it('does basic http get request with pat token auth', async () => {
+    // Using fake token for testing - never use real tokens in tests
     const token = 'scbfb44vxzku5l4xgc3qfazn3lpk4awflfryc76esaiq7aypcbhs'
     const ph: am.BearerCredentialHandler = new am.BearerCredentialHandler(token)
 

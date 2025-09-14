@@ -5,3 +5,22 @@ packages/*/__tests__/_temp/
 .DS_Store
 *.xar
 packages/*/audit.json
+
+# Security: Prevent accidental commit of secrets and tokens
+*.env
+*.env.local
+*.env.production
+.env*
+**/secrets.json
+**/*.pem
+**/*.p12
+**/*.key
+# GitHub Personal Access Tokens
+**/github_pat_*
+**/ghp_*
+# Other common token patterns
+**/token
+**/tokens
+**/*token*.txt
+**/*secret*.txt
+**/*password*.txt
