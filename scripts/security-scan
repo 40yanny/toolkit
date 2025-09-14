@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Security scan script for GitHub Actions Toolkit
+# Scans for common token patterns that should not be committed
+
+echo "🔍 Scanning for potential security issues..."
+
+# Define token patterns to search for
+PATTERNS=(
+  "github_pat_[A-Za-z0-9_]+"
+  "ghp_[A-Za-z0-9_]+"
+  "gho_[A-Za-z0-9_]+"
+  "ghu_[A-Za-z0-9_]+"
+  "ghs_[A-Za-z0-9_]+"
+  "ghr_[A-Za-z0-9_]+"
+  "['\"]sk-[A-Za-z0-9_-]{48}['\"]"
+  "AKIA[0-9A-Z]{16}"
+  "-----BEGIN [A-Z]+ PRIVATE KEY-----"
+)
+
+FOUND_ISSUES=0
+
+# Scan each pattern
+for pattern in "${PATTERNS[@]}"; do
+    echo "Checking pattern: $pattern"
+    
+    # Search in tracked files, excluding test files with fake tokens and documentation examples
+    MATCHES=$(git grep -E "$pattern" -- ':!**/__tests__/**' ':!**/test/**' ':!**/*.test.*' ':!SECURITY.md' ':!**/docs/**' ':!README.md' 2>/dev/null || true)
+    
+    if [ ! -z "$MATCHES" ]; then
+        echo "❌ SECURITY ISSUE: Found potential token:"
+        echo "$MATCHES"
+        echo ""
+        FOUND_ISSUES=$((FOUND_ISSUES + 1))
+    fi
+done
+
+# Also check for files that might contain secrets
+echo "🔍 Checking for suspicious files..."
+SUSPICIOUS_FILES=$(find . -type f \( -name "*secret*" -o -name "*token*" -o -name "*.pem" -o -name "*.key" \) -not -path "./.git/*" -not -path "./node_modules/*" 2>/dev/null || true)
+
+if [ ! -z "$SUSPICIOUS_FILES" ]; then
+    echo "⚠️  Found files with suspicious names:"
+    echo "$SUSPICIOUS_FILES"
+    echo "Please verify these files don't contain actual secrets."
+    echo ""
+fi
+
+# Final report
+if [ $FOUND_ISSUES -eq 0 ]; then
+    echo "✅ No security issues found!"
+    exit 0
+else
+    echo "❌ Found $FOUND_ISSUES potential security issues!"
+    echo "Please review and remove any real tokens before committing."
+    exit 1
+fi
